@@ -3,6 +3,7 @@ package com.client.jpa;
 import java.util.Calendar;
 import java.util.Date;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -33,12 +34,14 @@ public class JPAtag {
 	
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date sourceTimestamp;
+	
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date insertTime;
 
 	private int statusCode;
 	
-	private int intValue;
-	
-	private Double doubleValue;
+	@Column(precision = 16, scale = 8, columnDefinition="number(16, 8)", name = "value")
+	private Double value;
 	
 	private String valueType;
 
@@ -114,20 +117,20 @@ public class JPAtag {
 		this.statusCode = statusCode;
 	}
 
-	public int getIntValue() {
-		return intValue;
+	public Date getInsertTime() {
+		return insertTime;
 	}
 
-	public void setIntValue(int intValue) {
-		this.intValue = intValue;
+	public void setInsertTime(Date insertTime) {
+		this.insertTime = insertTime;
 	}
 
-	public Double getDoubleValue() {
-		return doubleValue;
+	public Double getValue() {
+		return value;
 	}
 
-	public void setDoubleValue(Double doubleValue) {
-		this.doubleValue = doubleValue;
+	public void setValue(Double value) {
+		this.value = value;
 	}
 
 	public String getValueType() {

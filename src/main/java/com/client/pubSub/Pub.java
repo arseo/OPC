@@ -97,9 +97,9 @@ public class Pub {
 		ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
 		service.scheduleAtFixedRate(runnable, 0, 1000, TimeUnit.MILLISECONDS);
 
-//		service.shutdownNow();
-//        
-//        
+
+		
+		
 //        // rabbit connect
 //        try (Connection connection = factory.newConnection();
 //             Channel channel = connection.createChannel()) {

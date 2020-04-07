@@ -5,8 +5,8 @@
 	<groupId>com.client</groupId>
 	<artifactId>opc</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-
 	<packaging>jar</packaging>
+	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<!-- JPA, 하이버네이트 버전 -->
@@ -32,12 +32,30 @@
 			<version>1.1.1</version>
 		</dependency>
 
+<!-- 		<dependency> -->
+<!-- 			<groupId>org.opcfoundation.ua</groupId> -->
+<!-- 			<artifactId>opc-ua-stack</artifactId> -->
+<!-- 			<version>1.4.1-224</version> -->
+<!-- 			<scope>system</scope> -->
+<!-- 			<systemPath>/root/eclipse-workspace/opc/lib/opc-ua-stack-1.4.1-224.jar</systemPath> -->
+<!-- 		</dependency> -->
+
 		<dependency>
-			<groupId>org.opcfoundation.ua</groupId>
+			<groupId>opcfoundation</groupId>
 			<artifactId>opc-ua-stack</artifactId>
 			<version>1.4.1-224</version>
-			<scope>system</scope>
-			<systemPath>/root/eclipse-workspace/opc/lib/opc-ua-stack-1.4.1-224.jar</systemPath>
+		</dependency>
+		
+		<dependency>
+			<groupId>ojdbc</groupId>
+			<artifactId>ojdbc</artifactId>
+			<version>8</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>commons-utils</groupId>
+			<artifactId>commons-utils</artifactId>
+			<version>1.1</version>
 		</dependency>
 
 		<dependency>
@@ -101,13 +119,22 @@
 				<artifactId>maven-assembly-plugin</artifactId>
 				<version>2.6</version>
 				<configuration>
-<!-- 					<descriptorRefs> -->
-<!-- 						<descriptorRef>jar-with-dependencies</descriptorRef> -->
-<!-- 					</descriptorRefs> -->
-					<descriptors>
-						Builds project zip
-						<descriptor>src/assembly/assembly.xml</descriptor>
-					</descriptors>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+<!-- 					<descriptors> -->
+<!-- 						Builds project zip -->
+<!-- 						<descriptor>src/assembly/assembly.xml</descriptor> -->
+<!-- 					</descriptors> -->
+					<archive>
+						<manifest>
+							<mainClass>com.client.main.Main</mainClass>
+							<addClasspath>true</addClasspath>
+							<classpathPrefix>lib/</classpathPrefix>
+<!-- 							<addExtensions>true</addExtensions> -->
+<!-- 							<packageName>com.client</packageName> -->
+						</manifest>
+					</archive>
 				</configuration>
 				<executions>
 					<execution>

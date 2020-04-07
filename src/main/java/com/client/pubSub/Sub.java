@@ -39,12 +39,11 @@ public class Sub {
         channel.queueBind(queueName, EXCHANGE_NAME, "");
 
         System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
-
+        EntityManagerFactory entityFactory = Persistence.createEntityManagerFactory("jpatest");
+        EntityManager manager = entityFactory.createEntityManager();
+        EntityTransaction transaction = manager.getTransaction();
         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
-        	EntityManagerFactory entityFactory = Persistence.createEntityManagerFactory("jpatest");
-            EntityManager manager = entityFactory.createEntityManager();
-            EntityTransaction transaction = manager.getTransaction();
-            
+
             try {
                 transaction.begin();
                 // rabbitMQ
@@ -54,10 +53,11 @@ public class Sub {
             } catch (Exception e) {
                 e.printStackTrace();
                 transaction.rollback();
-            } finally {
-                manager.close();
-            }
-            entityFactory.close();
+            } 
+//            finally {
+//                manager.close();
+//            }
+//            entityFactory.close();
         };
         channel.basicConsume(queueName, true, deliverCallback, consumerTag -> { });		
     }
@@ -86,16 +86,18 @@ public class Sub {
             	jpaTag.setServerTimestamp(serverDate);
             	jpaTag.setSourceTimestamp(sourceDate);
             	jpaTag.setStatusCode(((Long) tag.get("statusCode")).intValue());
-            	if (tag.get("valueType").toString().indexOf("Double") > -1 ) {
-            		jpaTag.setDoubleValue((Double) tag.get("value"));
+            	if (tag.get("valueType").toString().indexOf("Double") > -1 ) {	// double
+            		jpaTag.setValue((Double) tag.get("value"));
             		jpaTag.setValueType("Double");
-            	} else {
-            		System.out.println(tag.get("value").toString());
-            		jpaTag.setIntValue(((Long) tag.get("value")).intValue());
+            	} else {														// int
+            		jpaTag.setValue((double) ((Long) tag.get("value")).intValue());
             		jpaTag.setValueType("int");
-            	}
+            	}	
+            	Date insertTime = new Date(System.currentTimeMillis());
+            	jpaTag.setInsertTime(insertTime);
             	manager.persist(jpaTag);
             }
+            System.out.println("Insert");
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

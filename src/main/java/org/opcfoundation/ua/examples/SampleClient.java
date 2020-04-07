@@ -36,6 +36,7 @@ import java.util.Map;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.opcfoundation.ua.application.Application;
 import org.opcfoundation.ua.application.Client;
 import org.opcfoundation.ua.application.SessionChannel;
 import org.opcfoundation.ua.builtintypes.DateTime;
@@ -55,7 +56,9 @@ import org.opcfoundation.ua.core.BrowseDirection;
 import org.opcfoundation.ua.core.BrowseResponse;
 import org.opcfoundation.ua.core.BrowseResult;
 import org.opcfoundation.ua.core.BrowseResultMask;
+import org.opcfoundation.ua.core.EndpointDescription;
 import org.opcfoundation.ua.core.Identifiers;
+import org.opcfoundation.ua.core.MessageSecurityMode;
 import org.opcfoundation.ua.core.NodeClass;
 import org.opcfoundation.ua.core.ReadResponse;
 import org.opcfoundation.ua.core.ReadValueId;
@@ -66,6 +69,7 @@ import org.opcfoundation.ua.transport.security.Cert;
 import org.opcfoundation.ua.transport.security.HttpsSecurityPolicy;
 import org.opcfoundation.ua.transport.security.KeyPair;
 import org.opcfoundation.ua.utils.CertificateUtils;
+import org.opcfoundation.ua.utils.EndpointUtil;
 
 /**
  * Sample client creates a connection to OPC UA Server (1st arg), browses and
@@ -112,71 +116,59 @@ public class SampleClient {
 
 	public static Map<String, Object> connectClient(String url) throws Exception {
 //  public static void main(String[] args) throws Exception {
-//    if (args.length == 0) {
-//      System.out.println("Usage: SampleClient [server uri]");
-//      return;
-//    }
-//    String url = args[0];
-//    String url = "opc.tcp://192.168.56.1:53530/OPCUA/SimulationServer";
+
+//		String url = "opc.tcp://192.168.30.175:53530/OPCUA/SimulationServer";
 		System.out.print("SampleClient: Connecting to " + url + " .. ");
 
-		////////////// CLIENT //////////////
-		// Create Client
+		Application myClientApplication = new Application();
+		Client myClient = new Client(myClientApplication);
 
-		// Set default key size for created certificates. The default value is also
-		// 2048,
-		// but in some cases you may want to specify a different size.
-		CertificateUtils.setKeySize(2048);
+		EndpointDescription[] endpoints = myClient.discoverEndpoints(url);
+		// 위의 EndpointDescription[] 을 모두 출력 해 보거라.
+		// 이것은 서버가 지원하는 모든 인증 모드를 보여 줄 것이야.
+		// 아래 처럼 하면 endpoints 를 아래의 것들만 재정의를 하는 것 같다. EndpointUtil 이 말이야.
 
-		// Try to load an application certificate with the specified application name.
-		// In case it is not found, a new certificate is created.
-		final KeyPair pair = ExampleKeys.getCert("SampleClient");
-
-		// Create the client using information provided by the created certificate
-		final Client myClient = Client.createClientApplication(pair);
+		endpoints = EndpointUtil.selectByProtocol(endpoints, "opc.tcp");
+		endpoints = EndpointUtil.selectByMessageSecurityMode(endpoints, MessageSecurityMode.None);
 
 		myClient.getApplication().addLocale(Locale.ENGLISH);
 		myClient.getApplication().setApplicationName(new LocalizedText("Java Sample Client", Locale.ENGLISH));
 		myClient.getApplication().setProductUri("urn:JavaSampleClient");
 
-		// Create a certificate store for handling server certificates.
-		// The constructor uses relative path "SampleClientPKI/CA" as the base
-		// directory, storing
-		// rejected certificates in folder "rejected" and trusted certificates in folder
-		// "trusted".
-		// To accept a server certificate, a rejected certificate needs to be moved from
-		// rejected to
-		// trusted folder. This can be performed by moving the certificate manually,
-		// using method
-		// addTrustedCertificate of PkiDirectoryCertificateStore or, as in this example,
-		// using a
-		// custom implementation of DefaultCertificateValidatorListener.
-		final PkiDirectoryCertificateStore myCertStore = new PkiDirectoryCertificateStore("SampleClientPKI/CA");
+		// 위에서 endpoints array 는 opc.tcp 프로토콜 및 MessageSecurityMode.None 만으로 재정의된 것을
 
-		// Create a default certificate validator for validating server certificates in
-		// the certificate
-		// store.
-		final DefaultCertificateValidator myValidator = new DefaultCertificateValidator(myCertStore);
+		// 나열하니까, 1개 정도가 들어 있을 것이다.
 
-		// Set MyValidationListener instance as the ValidatorListener. In case a
-		// certificate is not
-		// automatically accepted, user can choose to reject or accept the certificate.
-		final MyValidationListener myValidationListener = new MyValidationListener();
-		myValidator.setValidationListener(myValidationListener);
+		EndpointDescription endpoint = endpoints[endpoints.length - 1];
+		endpoint.setEndpointUrl(url);
+		SessionChannel mySession = myClient.createSessionChannel(endpoint);
 
-		// Set myValidator as the validator for OpcTcp and Https
-		myClient.getApplication().getOpctcpSettings().setCertificateValidator(myValidator);
-		myClient.getApplication().getHttpsSettings().setCertificateValidator(myValidator);
+		// 이후 코드는 같다.
 
-		// The HTTPS SecurityPolicies are defined separate from the endpoint securities
-		myClient.getApplication().getHttpsSettings().setHttpsSecurityPolicies(HttpsSecurityPolicy.ALL_104);
-
-		// The certificate to use for HTTPS
-		KeyPair myHttpsCertificate = ExampleKeys.getHttpsCert("SampleClient");
-		myClient.getApplication().getHttpsSettings().setKeyPair(myHttpsCertificate);
-
-		SessionChannel mySession = myClient.createSessionChannel(url);
-		// mySession.activate("username", "123");
+//		CertificateUtils.setKeySize(2048);
+//
+//		final KeyPair pair = ExampleKeys.getCert("SampleClient");
+//
+//		final Client myClient = Client.createClientApplication(pair);
+//
+//		myClient.getApplication().addLocale(Locale.ENGLISH);
+//		myClient.getApplication().setApplicationName(new LocalizedText("Java Sample Client", Locale.ENGLISH));
+//		myClient.getApplication().setProductUri("urn:JavaSampleClient");
+//
+//		final PkiDirectoryCertificateStore myCertStore = new PkiDirectoryCertificateStore("SampleClientPKI/CA");
+//		final DefaultCertificateValidator myValidator = new DefaultCertificateValidator(myCertStore);
+//		final MyValidationListener myValidationListener = new MyValidationListener();
+//		myValidator.setValidationListener(myValidationListener);
+//
+//		myClient.getApplication().getOpctcpSettings().setCertificateValidator(myValidator);
+//		myClient.getApplication().getHttpsSettings().setCertificateValidator(myValidator);
+//
+//		myClient.getApplication().getHttpsSettings().setHttpsSecurityPolicies(HttpsSecurityPolicy.ALL_104);
+//
+//		KeyPair myHttpsCertificate = ExampleKeys.getHttpsCert("SampleClient");
+//		myClient.getApplication().getHttpsSettings().setKeyPair(myHttpsCertificate);
+//
+//		SessionChannel mySession = myClient.createSessionChannel(url);
 		mySession.activate();
 		//////////////////////////////////////
 
@@ -189,37 +181,22 @@ public class SampleClient {
 		browse.setNodeClassMask(NodeClass.Object, NodeClass.Variable);
 		browse.setResultMask(BrowseResultMask.All);
 		BrowseResponse res3 = mySession.Browse(null, null, null, browse);
-		// System.out.println(res3);
 
 		///////////////////// Make Function CallTag //////////////////////////////////
 
 		List<NodeId> nodeIdArray = callTag(res3, mySession, browse);
-
+		System.out.println(nodeIdArray);
 		//////////////////////////////////////////////////////////////////////
 
 		// Read Namespace Array
 		ReadResponse res5 = mySession.Read(null, null, TimestampsToReturn.Neither,
 				new ReadValueId(Identifiers.Server_NamespaceArray, Attributes.Value, null, null));
 		String[] namespaceArray = (String[]) res5.getResults()[0].getValue().getValue();
-//    System.out.println(Arrays.toString(namespaceArray));
-
-		// Read a variable (Works with NanoServer example!)
-//    ReadResponse res4 = mySession.Read(null, 500.0, TimestampsToReturn.Source,
-//        new ReadValueId(new NodeId(3, "Counter"), Attributes.Value, null, null));
-		
-
-//    System.out.println(tagJson);
-
-		///////////// SHUTDOWN /////////////
-//		mySession.close();
-//		mySession.closeAsync();
-		//////////////////////////////////////
 
 		Map<String, Object> returnMap = new HashMap<>();
 		
 		returnMap.put("nodeIdArray", nodeIdArray);
 		returnMap.put("mySession", mySession);
-
 		return returnMap;
 	}
 	
@@ -269,8 +246,6 @@ public class SampleClient {
 		browse.setNodeId(nodeId);
 		res3 = mySession.Browse(null, null, null, browse);
 
-//		System.out.println(res3);
-
 		BrowseResult[] simulatorBR = res3.getResults();
 		ReferenceDescription[] simulatorRD = simulatorBR[0].getReferences();
 
@@ -280,7 +255,6 @@ public class SampleClient {
 
 		browse.setNodeId(nodeId);
 		res3 = mySession.Browse(null, null, null, browse);
-//		System.out.println(res3);
 
 		BrowseResult[] tagBR = res3.getResults();
 		ReferenceDescription[] tagRD = tagBR[0].getReferences();

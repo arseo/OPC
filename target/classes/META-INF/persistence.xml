@@ -14,15 +14,15 @@ http://java.sun.com/xml/ns/persistence/orm http://java.sun.com/xml/ns/persistenc
 		<properties>
 			<property name="javax.persistence.jdbc.driver" value="oracle.jdbc.OracleDriver" />
 			<property name="javax.persistence.jdbc.url" value="jdbc:oracle:thin:@localhost:1521:orcl" />
-			<property name="javax.persistence.jdbc.user" value="system" />
+			<property name="javax.persistence.jdbc.user" value="arseo" />
 			<property name="javax.persistence.jdbc.password" value="flak0126" />
 
 
 <!-- 			<property name="hibernate.show_sql" value="true" />  -->
-            <property name="hibernate.format_sql" value="true" />
-            <property name="hibernate.use_sql_comments" value="true" />
+<!--             <property name="hibernate.format_sql" value="true" /> -->
+<!--             <property name="hibernate.use_sql_comments" value="true" /> -->
             <property name="hibernate.id.new_generator_mappings" value="true" />
-			<property name="hibernate.hbm2ddl.auto" value="update" />
+			<property name="hibernate.hbm2ddl.auto" value="none" />
 		</properties>
 	</persistence-unit>
 	<!-- <persistence-unit name="jpabook_h2">
